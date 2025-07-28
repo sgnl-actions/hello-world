@@ -1,4 +1,5 @@
-import { jest } from '@jest/globals';
+// Import jest globals for extended Jest API if needed
+// import { jest } from '@jest/globals';
 import script from '../src/script.mjs';
 
 describe('Job Template Script', () => {

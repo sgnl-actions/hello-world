@@ -69,7 +69,7 @@ export default {
    * @param {Object} context - Execution context
    * @returns {Object} Recovery results
    */
-  error: async (params, context) => {
+  error: async (params, context) => { // eslint-disable-line no-unused-vars
     const { error, target, action } = params;
     console.error(`Job encountered error while processing ${target}: ${error.message}`);
     

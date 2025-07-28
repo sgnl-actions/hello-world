@@ -1,13 +1,13 @@
 export default {
   testEnvironment: 'node',
+  testTimeout: 10000,
   transform: {},
-  extensionsToTreatAsEsm: ['.js'],
-  globals: {
-    'ts-jest': {
-      useESM: true
-    }
-  },
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1'
-  }
+  },
+  testMatch: ['**/tests/**/*.js'],
+  collectCoverageFrom: [
+    'src/**/*.{js,mjs}',
+    '!src/**/*.test.{js,mjs}'
+  ]
 };
