@@ -3,45 +3,38 @@ description: Template for SGNL JavaScript jobs - replace with your job descripti
 
 # Input parameters for web form generation
 inputs:
-  target:
+  first_name:
     type: text
-    description: Target resource identifier (e.g., user email, group ID)
+    description: First name of the person to greet
     required: true
     validation:
-      min: 1
-      max: 100
-
-  action:
-    type: text
-    description: Action to perform on the target resource
-    required: true
-    validation:
-      min: 1
+      min: 3
       max: 50
 
-  options:
-    type: array
-    description: Additional options for the operation
-    required: false
-    item_type: text
+  last_name:
+    type: text
+    description: Last name of the person to greet
+    required: true
     validation:
-      max: 10
+      min: 3
+      max: 50
 
-  dry_run:
-    type: boolean
-    description: Preview changes without executing them
+  language:
+    type: text
+    description: Language for the greeting (en, es, fr, de, it, pt, ja, zh, ru, ar)
     required: false
-    default: false
+    validation:
+      regex: "^(en|es|fr|de|it|pt|ja|zh|ru|ar)$"
 
 # Expected output structure
 outputs:
-  status:
+  message:
     type: text
-    description: Operation result (success, failed, recovered, etc.)
+    description: The hello world message
 
-  target:
+  language:
     type: text
-    description: The target resource that was processed
+    description: The language that was used
 
   processed_at:
     type: datetime
