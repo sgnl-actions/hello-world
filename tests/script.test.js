@@ -2,7 +2,7 @@
 // import { jest } from '@jest/globals';
 import script from '../src/script.mjs';
 
-describe('Job Template Script', () => {
+describe('Hello World Job Script', () => {
   const mockContext = {
     env: {
       ENVIRONMENT: 'test'
@@ -16,179 +16,146 @@ describe('Job Template Script', () => {
   };
 
   describe('invoke handler', () => {
-    test('should execute successfully with minimal params', async () => {
+    test('should create hello world message with all parameters', async () => {
       const params = {
-        target: 'test-user@example.com',
-        action: 'create'
+        first_name: 'John',
+        last_name: 'Doe',
+        language: 'en'
       };
 
       const result = await script.invoke(params, mockContext);
 
-      expect(result.status).toBe('success');
-      expect(result.target).toBe('test-user@example.com');
-      expect(result.action).toBe('create');
-      expect(result.status).toBeDefined();
+      expect(result.message).toBe('Hello World, John Doe!');
+      expect(result.language).toBe('en');
       expect(result.processed_at).toBeDefined();
-      expect(result.options_processed).toBe(0);
     });
 
-    test('should handle dry run mode', async () => {
+    test('should handle missing language with random selection', async () => {
       const params = {
-        target: 'test-user@example.com',
-        action: 'delete',
-        dry_run: true
+        first_name: 'Jane',
+        last_name: 'Smith'
       };
 
       const result = await script.invoke(params, mockContext);
 
-      expect(result.status).toBe('dry_run_completed');
-      expect(result.target).toBe('test-user@example.com');
-      expect(result.action).toBe('delete');
+      expect(result.message).toMatch(/^.+, Jane Smith!$/);
+      expect(result.language).toBeDefined();
+      expect(['en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'zh', 'ru', 'ar']).toContain(result.language);
+      expect(result.processed_at).toBeDefined();
     });
 
-    test('should process options array', async () => {
+    test('should create message in Spanish', async () => {
       const params = {
-        target: 'test-group',
-        action: 'update',
-        options: ['force', 'notify', 'audit']
+        first_name: 'Maria',
+        last_name: 'Garcia',
+        language: 'es'
       };
 
       const result = await script.invoke(params, mockContext);
 
-      expect(result.status).toBe('success');
-      expect(result.target).toBe('test-group');
-      expect(result.options_processed).toBe(3);
+      expect(result.message).toBe('Hola Mundo, Maria Garcia!');
+      expect(result.language).toBe('es');
+      expect(result.processed_at).toBeDefined();
     });
 
-    test('should handle context with previous job outputs', async () => {
-      const contextWithOutputs = {
-        ...mockContext,
-        outputs: {
-          'create-user': {
-            user_id: '12345',
-            created_at: '2024-01-15T10:30:00Z'
-          },
-          'assign-groups': {
-            groups_assigned: 3
-          }
-        }
-      };
-
+    test('should create message in French', async () => {
       const params = {
-        target: 'user-12345',
-        action: 'finalize'
+        first_name: 'Pierre',
+        last_name: 'Dupont',
+        language: 'fr'
       };
 
-      const result = await script.invoke(params, contextWithOutputs);
+      const result = await script.invoke(params, mockContext);
 
-      expect(result.status).toBe('success');
-      expect(result.target).toBe('user-12345');
-      expect(result.status).toBeDefined();
+      expect(result.message).toBe('Bonjour le Monde, Pierre Dupont!');
+      expect(result.language).toBe('fr');
+      expect(result.processed_at).toBeDefined();
     });
   });
 
   describe('error handler', () => {
-    test('should recover from rate limit errors', async () => {
+    test('should recover from language-related errors', async () => {
       const params = {
-        target: 'test-user@example.com',
-        action: 'create',
+        first_name: 'John',
+        last_name: 'Doe',
+        language: 'invalid',
         error: {
-          message: 'API rate limit exceeded - 429',
-          code: 'RATE_LIMIT'
+          message: 'Invalid language specified',
+          code: 'LANGUAGE_ERROR'
         }
       };
 
-      const result = await script.error(params, mockContext);
+      const result = await script.error(params);
 
-      expect(result.status).toBe('recovered');
-      expect(result.target).toBe('test-user@example.com');
-      expect(result.recovery_method).toBe('rate_limit_backoff');
-      expect(result.original_error).toContain('rate limit');
-      expect(result.status).toBeDefined();
+      expect(result.message).toBe('Hello World, John Doe!');
+      expect(result.language).toBe('en');
+      expect(result.processed_at).toBeDefined();
     });
 
-    test('should use fallback for service unavailable', async () => {
+    test('should recover from greeting-related errors', async () => {
       const params = {
-        target: 'test-user@example.com',
-        action: 'update',
+        first_name: 'Jane',
+        last_name: 'Smith',
         error: {
-          message: 'Service unavailable - 503',
-          code: 'SERVICE_UNAVAILABLE'
+          message: 'Failed to load greeting template',
+          code: 'GREETING_ERROR'
         }
       };
 
-      const result = await script.error(params, mockContext);
+      const result = await script.error(params);
 
-      expect(result.status).toBe('fallback_used');
-      expect(result.target).toBe('test-user@example.com');
-      expect(result.recovery_method).toBe('fallback_service');
-      expect(result.original_error).toContain('Service unavailable');
+      expect(result.message).toBe('Hello World, Jane Smith!');
+      expect(result.language).toBe('en');
+      expect(result.processed_at).toBeDefined();
     });
 
     test('should throw for unrecoverable errors', async () => {
       const params = {
-        target: 'test-user@example.com',
-        action: 'create',
+        first_name: 'John',
+        last_name: 'Doe',
         error: {
-          message: 'Invalid configuration - missing API key',
-          code: 'CONFIG_ERROR'
+          message: 'Database connection failed',
+          code: 'DB_ERROR'
         }
       };
 
-      await expect(script.error(params, mockContext)).rejects.toThrow('Unrecoverable error');
+      await expect(script.error(params)).rejects.toThrow('Unrecoverable error creating greeting');
     });
   });
 
   describe('halt handler', () => {
     test('should handle graceful shutdown', async () => {
       const params = {
-        target: 'test-user@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
         reason: 'timeout'
       };
 
-      const result = await script.halt(params, mockContext);
+      const result = await script.halt(params);
 
-      expect(result.status).toBe('halted');
-      expect(result.target).toBe('test-user@example.com');
-      expect(result.reason).toBe('timeout');
-      expect(result.cleanup_completed).toBe(true);
-      expect(result.halted_at).toBeDefined();
-      expect(result.status).toBeDefined();
+      expect(result).toBeUndefined(); // halt method doesn't return anything
     });
 
-    test('should save partial results when available', async () => {
-      const contextWithPartialResults = {
-        ...mockContext,
-        partial_results: {
-          processed_count: 5,
-          total_count: 10,
-          completed_items: ['item1', 'item2', 'item3']
-        }
-      };
-
+    test('should handle shutdown with different reason', async () => {
       const params = {
-        target: 'batch-operation',
+        first_name: 'Jane',
+        last_name: 'Smith',
         reason: 'cancellation'
       };
 
-      const result = await script.halt(params, contextWithPartialResults);
+      const result = await script.halt(params);
 
-      expect(result.status).toBe('halted');
-      expect(result.partial_results_saved).toBe(true);
-      expect(result.reason).toBe('cancellation');
+      expect(result).toBeUndefined(); // halt method doesn't return anything
     });
 
-    test('should handle halt without target', async () => {
+    test('should handle halt without names', async () => {
       const params = {
         reason: 'system_shutdown'
       };
 
-      const result = await script.halt(params, mockContext);
+      const result = await script.halt(params);
 
-      expect(result.status).toBe('halted');
-      expect(result.target).toBe('unknown');
-      expect(result.reason).toBe('system_shutdown');
-      expect(result.cleanup_completed).toBe(true);
+      expect(result).toBeUndefined(); // halt method doesn't return anything
     });
   });
 });

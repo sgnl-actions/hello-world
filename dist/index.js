@@ -1,148 +1,95 @@
 // SGNL Job Script - Auto-generated bundle
 /**
- * SGNL Job Template
+ * SGNL Hello World Job
  * 
- * This template provides a starting point for implementing SGNL jobs.
- * Replace this implementation with your specific business logic.
+ * Creates personalized hello world messages in multiple languages.
  */
 
 var script = {
   /**
-   * Main execution handler - implement your job logic here
+   * Main execution handler - creates hello world message
    * @param {Object} params - Job input parameters
    * @param {Object} context - Execution context with env, secrets, outputs
    * @returns {Object} Job results
    */
   invoke: async (params, context) => {
-    console.log('Starting job execution');
-    console.log(`Processing target: ${params.target}`);
-    console.log(`Action: ${params.action}`);
+    console.log('Starting hello world job execution');
     
-    // TODO: Replace with your implementation
-    const { target, action, options = [], dry_run = false } = params;
+    const { first_name, last_name, language } = params;
     
-    if (dry_run) {
-      console.log('DRY RUN: No changes will be made');
+    // Define supported languages and their greetings
+    const greetings = {
+      en: 'Hello World',
+      es: 'Hola Mundo',
+      fr: 'Bonjour le Monde',
+      de: 'Hallo Welt',
+      it: 'Ciao Mondo',
+      pt: 'Olá Mundo',
+      ja: 'こんにちは世界',
+      zh: '你好世界',
+      ru: 'Привет мир',
+      ar: 'مرحبا بالعالم'
+    };
+    
+    // Select language - use provided language or random if not provided
+    let selectedLanguage = language;
+    if (!selectedLanguage) {
+      const supportedLanguages = Object.keys(greetings);
+      selectedLanguage = supportedLanguages[Math.floor(Math.random() * supportedLanguages.length)];
+      console.log(`No language specified, randomly selected: ${selectedLanguage}`);
     }
     
-    // Access environment variables
-    const environment = context.env.ENVIRONMENT || 'development';
-    console.log(`Running in ${environment} environment`);
+    console.log(`Creating greeting in ${selectedLanguage} for ${first_name} ${last_name}`);
     
-    // Access secrets securely (example)
-    if (context.secrets.API_KEY) {
-      console.log(`Using API key ending in ...${context.secrets.API_KEY.slice(-4)}`);
-    }
+    // Create the personalized message
+    const greeting = greetings[selectedLanguage];
+    const message = `${greeting}, ${first_name} ${last_name}!`;
     
-    // Use outputs from previous jobs in workflow
-    if (context.outputs && Object.keys(context.outputs).length > 0) {
-      console.log(`Available outputs from ${Object.keys(context.outputs).length} previous jobs`);
-      console.log(`Previous job outputs: ${Object.keys(context.outputs).join(', ')}`);
-    }
-    
-    // Simulate work
-    console.log(`Performing ${action} on ${target}...`);
-    
-    if (options.length > 0) {
-      console.log(`Processing ${options.length} options: ${options.join(', ')}`);
-    }
-    
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    console.log(`Successfully completed ${action} on ${target}`);
+    console.log(`Generated message: ${message}`);
     
     // Return structured results
     return {
-      status: dry_run ? 'dry_run_completed' : 'success',
-      target: target,
-      action: action,
-      options_processed: options.length,
-      environment: environment,
-      processed_at: new Date().toISOString(),
-      // Job completed successfully
+      message: message,
+      language: selectedLanguage,
+      processed_at: new Date().toISOString()
     };
   },
 
   /**
    * Error recovery handler - implement error handling logic
    * @param {Object} params - Original params plus error information
-   * @param {Object} context - Execution context
    * @returns {Object} Recovery results
    */
-  error: async (params, context) => { // eslint-disable-line no-unused-vars
-    const { error, target, action } = params;
-    console.error(`Job encountered error while processing ${target}: ${error.message}`);
+  error: async (params) => {
+    const { error, first_name, last_name, language } = params;
+    console.error(`Hello world job encountered error for ${first_name} ${last_name}: ${error.message}`);
     
-    // TODO: Implement your error recovery logic
-    
-    // Example: Retry with different approach
-    if (error.message.includes('rate limit') || error.message.includes('429')) {
-      console.log('Rate limited - implementing backoff strategy');
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      
-      console.log(`Retrying ${action} on ${target} after backoff`);
+    // Try to provide a fallback greeting in English if language selection failed
+    if (error.message.includes('language') || error.message.includes('greeting')) {
+      console.log('Language error detected - falling back to English');
       
       return {
-        status: 'recovered',
-        target: target,
-        recovery_method: 'rate_limit_backoff',
-        original_error: error.message,
-        recovered_at: new Date().toISOString(),
-        // Job completed successfully
-      };
-    }
-    
-    // Example: Fallback approach
-    if (error.message.includes('service unavailable') || error.message.includes('503')) {
-      console.log('Primary service unavailable - using fallback approach');
-      
-      return {
-        status: 'fallback_used',
-        target: target,
-        recovery_method: 'fallback_service',
-        original_error: error.message,
-        recovered_at: new Date().toISOString(),
-        // Job completed successfully
+        message: `Hello World, ${first_name} ${last_name}!`,
+        language: 'en',
+        processed_at: new Date().toISOString()
       };
     }
     
     // Cannot recover from this error
-    console.error(`Unable to recover from error for ${target}`);
-    throw new Error(`Unrecoverable error processing ${target}: ${error.message}`);
+    console.error(`Unable to recover from error for ${first_name} ${last_name}`);
+    throw new Error(`Unrecoverable error creating greeting: ${error.message}`);
   },
 
   /**
    * Graceful shutdown handler - implement cleanup logic
    * @param {Object} params - Original params plus halt reason
-   * @param {Object} context - Execution context
-   * @returns {Object} Cleanup results
    */
-  halt: async (params, context) => {
-    const { reason, target } = params;
-    console.log(`Job is being halted (${reason}) while processing ${target}`);
+  halt: async (params) => {
+    const { reason, first_name, last_name } = params;
+    console.log(`Hello world job is being halted (${reason}) for ${first_name} ${last_name}`);
     
-    // TODO: Implement your cleanup logic
-    
-    // Save any partial progress
-    if (context.partial_results) {
-      console.log('Saving partial results before shutdown');
-      // Example: await savePartialResults(context.partial_results);
-    }
-    
-    // Clean up resources
-    console.log('Performing cleanup operations');
-    // Example: await cleanupResources();
-    
-    return {
-      status: 'halted',
-      target: target || 'unknown',
-      reason: reason,
-      halted_at: new Date().toISOString(),
-      cleanup_completed: true,
-      partial_results_saved: !!context.partial_results,
-      // Job completed successfully
-    };
+    // No significant cleanup needed for hello world job
+    console.log('Performing minimal cleanup operations');
   }
 };
 
