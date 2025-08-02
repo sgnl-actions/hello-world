@@ -1,4 +1,6 @@
 // SGNL Job Script - Auto-generated bundle
+'use strict';
+
 /**
  * SGNL Hello World Job
  * 
@@ -93,4 +95,4 @@ var script = {
   }
 };
 
-export { script as default };
+module.exports = script;

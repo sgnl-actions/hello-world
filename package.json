@@ -2,7 +2,7 @@
   "name": "@sgnl/job-hello-world",
   "version": "1.0.0",
   "description": "Hello World example for SGNL JavaScript jobs",
-  "type": "module",
+  "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
     "build": "rollup -c",
