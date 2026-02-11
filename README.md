@@ -111,7 +111,7 @@ Releases are created via the **Release** workflow in the GitHub Actions tab:
 1. Merge your changes to `main`
 2. Go to **Actions** > **Release** > **Run workflow**
 3. Select the bump level (`patch`, `minor`, or `major`)
-4. The workflow runs the full CI gate, bumps `package.json`, tags, and creates a GitHub Release
+4. The workflow runs the full CI gate, computes the next version from the latest tag, tags HEAD, and creates a GitHub Release
 
 Pin actions to a specific tag in job requests (e.g., `@v1.0.0`). Floating version tags are not used.
 
