@@ -1,6 +1,6 @@
 /**
  * SGNL Hello World Job
- * 
+ *
  * Creates personalized hello world messages in multiple languages.
  */
 
@@ -11,11 +11,18 @@ export default {
    * @param {Object} context - Execution context with env, secrets, outputs
    * @returns {Object} Job results
    */
-  invoke: async (params, context) => {
+  invoke: async (params, _context) => {
     console.log('Starting hello world job execution');
-    
+
     const { first_name, last_name, language } = params;
-    
+
+    if (!first_name) {
+      throw new Error('Missing required parameter: first_name');
+    }
+    if (!last_name) {
+      throw new Error('Missing required parameter: last_name');
+    }
+
     // Define supported languages and their greetings
     const greetings = {
       en: 'Hello World',
@@ -29,7 +36,12 @@ export default {
       ru: 'Привет мир',
       ar: 'مرحبا بالعالم'
     };
-    
+
+    // Validate language if provided
+    if (language && !greetings[language]) {
+      throw new Error(`Unsupported language: ${language}`);
+    }
+
     // Select language - use provided language or random if not provided
     let selectedLanguage = language;
     if (!selectedLanguage) {
@@ -37,18 +49,18 @@ export default {
       selectedLanguage = supportedLanguages[Math.floor(Math.random() * supportedLanguages.length)];
       console.log(`No language specified, randomly selected: ${selectedLanguage}`);
     }
-    
+
     console.log(`Creating greeting in ${selectedLanguage} for ${first_name} ${last_name}`);
-    
+
     // Create the personalized message
     const greeting = greetings[selectedLanguage];
     const message = `${greeting}, ${first_name} ${last_name}!`;
-    
+
     console.log(`Generated message: ${message}`);
-    
+
     // Return structured results
     return {
-      message: message,
+      message,
       language: selectedLanguage,
       processed_at: new Date().toISOString()
     };
@@ -60,20 +72,20 @@ export default {
    * @returns {Object} Recovery results
    */
   error: async (params) => {
-    const { error, first_name, last_name, language } = params;
+    const { error, first_name, last_name } = params;
     console.error(`Hello world job encountered error for ${first_name} ${last_name}: ${error.message}`);
-    
+
     // Try to provide a fallback greeting in English if language selection failed
     if (error.message.includes('language') || error.message.includes('greeting')) {
       console.log('Language error detected - falling back to English');
-      
+
       return {
         message: `Hello World, ${first_name} ${last_name}!`,
         language: 'en',
         processed_at: new Date().toISOString()
       };
     }
-    
+
     // Cannot recover from this error
     console.error(`Unable to recover from error for ${first_name} ${last_name}`);
     throw new Error(`Unrecoverable error creating greeting: ${error.message}`);
@@ -86,7 +98,7 @@ export default {
   halt: async (params) => {
     const { reason, first_name, last_name } = params;
     console.log(`Hello world job is being halted (${reason}) for ${first_name} ${last_name}`);
-    
+
     // No significant cleanup needed for hello world job
     console.log('Performing minimal cleanup operations');
   }

@@ -1,5 +1,6 @@
-name: job-template
-description: Template for SGNL JavaScript jobs - replace with your job description
+# yaml-language-server: $schema=https://raw.githubusercontent.com/sgnl-actions/schemas/main/metadata.schema.json
+name: hello-world
+description: Hello World example for SGNL JavaScript jobs
 
 # Input parameters for web form generation
 inputs:
