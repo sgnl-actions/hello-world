@@ -50,6 +50,11 @@ jobs:
         echo "tag=$TAG" >> "$GITHUB_OUTPUT"
         echo "Releasing $TAG (was $LATEST, bump: ${{ inputs.bump }})"
 
+    - name: Configure git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
     - name: Create and push tag
       run: |
         git tag -a "$TAG" -m "Release $TAG"
