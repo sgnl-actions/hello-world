@@ -1,6 +1,5 @@
 {
   "name": "@sgnl/job-hello-world",
-  "version": "1.0.0",
   "description": "Hello World example for SGNL JavaScript jobs",
   "type": "module",
   "main": "dist/index.js",
