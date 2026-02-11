@@ -1,5 +1,3 @@
-// Import jest globals for extended Jest API if needed
-// import { jest } from '@jest/globals';
 import script from '../src/script.mjs';
 
 describe('Hello World Job Script', () => {
@@ -44,32 +42,60 @@ describe('Hello World Job Script', () => {
       expect(result.processed_at).toBeDefined();
     });
 
-    test('should create message in Spanish', async () => {
+    test.each([
+      ['en', 'Hello World'],
+      ['es', 'Hola Mundo'],
+      ['fr', 'Bonjour le Monde'],
+      ['de', 'Hallo Welt'],
+      ['it', 'Ciao Mondo'],
+      ['pt', 'Olá Mundo'],
+      ['ja', 'こんにちは世界'],
+      ['zh', '你好世界'],
+      ['ru', 'Привет мир'],
+      ['ar', 'مرحبا بالعالم']
+    ])('should create correct greeting in %s', async (lang, expectedGreeting) => {
       const params = {
-        first_name: 'Maria',
-        last_name: 'Garcia',
-        language: 'es'
+        first_name: 'Test',
+        last_name: 'User',
+        language: lang
       };
 
       const result = await script.invoke(params, mockContext);
 
-      expect(result.message).toBe('Hola Mundo, Maria Garcia!');
-      expect(result.language).toBe('es');
+      expect(result.message).toBe(`${expectedGreeting}, Test User!`);
+      expect(result.language).toBe(lang);
       expect(result.processed_at).toBeDefined();
     });
 
-    test('should create message in French', async () => {
+    test('should throw when first_name is missing', async () => {
       const params = {
-        first_name: 'Pierre',
-        last_name: 'Dupont',
-        language: 'fr'
+        last_name: 'Doe',
+        language: 'en'
       };
 
-      const result = await script.invoke(params, mockContext);
+      await expect(script.invoke(params, mockContext))
+        .rejects.toThrow('Missing required parameter: first_name');
+    });
 
-      expect(result.message).toBe('Bonjour le Monde, Pierre Dupont!');
-      expect(result.language).toBe('fr');
-      expect(result.processed_at).toBeDefined();
+    test('should throw when last_name is missing', async () => {
+      const params = {
+        first_name: 'John',
+        language: 'en'
+      };
+
+      await expect(script.invoke(params, mockContext))
+        .rejects.toThrow('Missing required parameter: last_name');
+    });
+
+    test('should throw for unsupported language', async () => {
+      const params = {
+        first_name: 'John',
+        last_name: 'Doe',
+        language: 'xx'
+      };
+
+      await expect(script.invoke(params, mockContext))
+        .rejects.toThrow('Unsupported language: xx');
     });
   });
 
@@ -133,7 +159,7 @@ describe('Hello World Job Script', () => {
 
       const result = await script.halt(params);
 
-      expect(result).toBeUndefined(); // halt method doesn't return anything
+      expect(result).toBeUndefined();
     });
 
     test('should handle shutdown with different reason', async () => {
@@ -145,7 +171,7 @@ describe('Hello World Job Script', () => {
 
       const result = await script.halt(params);
 
-      expect(result).toBeUndefined(); // halt method doesn't return anything
+      expect(result).toBeUndefined();
     });
 
     test('should handle halt without names', async () => {
@@ -155,7 +181,7 @@ describe('Hello World Job Script', () => {
 
       const result = await script.halt(params);
 
-      expect(result).toBeUndefined(); // halt method doesn't return anything
+      expect(result).toBeUndefined();
     });
   });
 });
