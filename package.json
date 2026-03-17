@@ -29,7 +29,7 @@
     "@sgnl-actions/validate": "github:sgnl-actions/validate#1392b07e0c1563e729d68d2eec328ee8e03e0783",
     "eslint": "^10.0.0",
     "generate-license-file": "^4.1.1",
-    "jest": "^30.2.0",
+    "jest": "^30.3.0",
     "rollup": "^4.28.1"
   }
 }
