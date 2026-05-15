@@ -31,5 +31,8 @@
     "generate-license-file": "^4.1.1",
     "jest": "^30.3.0",
     "rollup": "^4.60.4"
+  },
+  "overrides": {
+    "serialize-javascript": ">=7.0.5"
   }
 }
